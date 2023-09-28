@@ -9,16 +9,18 @@ public class DiceRoll {
     private int p2Score;
     private static boolean p1Turn;
     // ændring
-    private boolean priviousRollTwoSixes;
+    private boolean p1RolledTwoSixes;
+    private boolean p2RolledTwoSixes;
     private boolean extraTurn;
+    private Scanner scan;
 
     public DiceRoll() {
         sum = 0;
         p1Score = 0;
         p2Score = 0;
         p1Turn = true;
-        priviousRollTwoSixes = false;
-
+        p1RolledTwoSixes = false;
+        p2RolledTwoSixes = false;
     }
 
     public void rollDice() {
@@ -50,11 +52,15 @@ public class DiceRoll {
                 System.out.println("Oh no, player 2 rolled two 1's and lost all points.");
                 p2Score = 0;
             }
-            priviousRollTwoSixes = false;
-            // ændring
+            extraTurn = true;
+            if (p1Turn) {
+                p1RolledTwoSixes = false;
+            } else {
+                p2RolledTwoSixes = false;
+            }
         }
         if (d1 == 6 && d2 == 6) {
-            if (!priviousRollTwoSixes) {
+            if ((p1Turn && !p1RolledTwoSixes) || (!p1Turn && !p2RolledTwoSixes)) {
                 System.out.println("The dice rolled the same number " + d1 + ", roll again.");
                 if (p1Turn)
                     System.out.println("Total score - Player 1: " + p1Score);
@@ -72,7 +78,12 @@ public class DiceRoll {
                 System.out.println("Press enter to exit game");
                 System.exit(0);
             }
-            priviousRollTwoSixes = true;
+            checkWinner();
+            if (p1Turn) {
+                p1RolledTwoSixes = true;
+            } else {
+                p2RolledTwoSixes = true;
+            }
         } else if (d1 == d2) {
             System.out.println("The dice rolled the same number " + d1 + ", roll again.");
             if (p1Turn)
@@ -81,17 +92,29 @@ public class DiceRoll {
                 System.out.println("Total score - Player 2: " + p2Score);
             // rollDice();
             extraTurn = true;
-            priviousRollTwoSixes = false;
-        }
-        if (getp1Score() >= 40) {
-            System.out.println("Player 1 wins the game!");
-            System.out.println("Press enter to exit game");
-            System.exit(0);
+            if (p1Turn) {
+                p1RolledTwoSixes = false;
+            } else {
+                p2RolledTwoSixes = false;
+            }
+            checkWinner();
         }
 
-        if (getp2Score() >= 40) {
-            System.out.println("Player 2 wins the game!");
+    }
+
+    public void checkWinner() {
+
+        if (getP1Score() >= 40 && (p1Turn)) {
+            System.out.println("Player 1 wins the game!");
             System.out.println("Press enter to exit game");
+            scan.close();
+            System.exit(0);
+        }
+        if (getP2Score() >= 40 && (!p1Turn)) {
+            System.out.println("Player 2 wins the game!");
+            ;
+            System.out.println("Press enter to exit game");
+            scan.close();
             System.exit(0);
         }
     }
@@ -112,26 +135,22 @@ public class DiceRoll {
         return sum;
     }
 
-    public int getp1Score() {
+    public int getP1Score() {
         return p1Score;
     }
 
-    public int getp2Score() {
+    public int getP2Score() {
         return p2Score;
     }
 
     public static void main(String[] args) {
         DiceRoll diceRoll = new DiceRoll();
-        var scan = new Scanner(System.in);
+        diceRoll.scan = new Scanner(System.in);
 
         System.out.println("DiceGame" + "\n" + "Press enter to play");
 
         while (true) {
-            scan.nextLine();
-
-            if (diceRoll.getp1Score() >= 40 || diceRoll.getp2Score() >= 40) {
-                break;
-            }
+            diceRoll.scan.nextLine();
 
             diceRoll.rollDice();
 
@@ -140,27 +159,13 @@ public class DiceRoll {
             System.out.println("Sum of the 2 die: " + diceRoll.getSum());
 
             if (DiceRoll.p1Turn) {
-                System.out.println("Total score - Player 1: " + diceRoll.getp1Score());
+                System.out.println("Total score - Player 1: " + diceRoll.getP1Score());
                 p1Turn = false;
             } else {
-                System.out.println("Total score - Player 2: " + diceRoll.getp2Score());
+                System.out.println("Total score - Player 2: " + diceRoll.getP2Score());
                 p1Turn = true;
             }
 
-            if (diceRoll.getp1Score() >= 40) {
-                System.out.println("Player 1 wins the game!");
-                System.out.println("Press enter to exit game");
-                System.exit(0);
-            }
-
-            if (diceRoll.getp2Score() >= 40) {
-                System.out.println("Player 2 wins the game!");
-                System.out.println("Press enter to exit game");
-                System.exit(0);
-            }
-
         }
-
-        scan.close();
     }
 }
